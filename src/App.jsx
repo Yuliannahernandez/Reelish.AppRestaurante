@@ -31,8 +31,8 @@ import EditarProductoScreen from './pages/EditarProductoScreen';
 import AgregarProductoScreen from './pages/AgregarProductoScreen';
 import TwoFactorSettings from './pages/TwoFactorSettings';
 import VerifyEmailScreen from './pages/VerifyEmailScreen';
-
-
+import ResetPasswordScreen from './pages/ResetPasswordScreen';
+import FindAccountScreen from './pages/FindAccountScreen';
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -61,6 +61,7 @@ function App() {
           <Route path="/categoria/:id" element={<ProductosCategoriaScreen />} />
           <Route path="/gerente/productos/editar/:id" element={<EditarProductoScreen />} />
           <Route path="/productos/:id" element={<ProductoDetalleScreen />} />
+          <Route path="/reset-password" element={<ResetPasswordScreen />} />
           <Route path="/verify-email" element={<VerifyEmailScreen />} />
           <Route
             path="/gerente/productos/nuevo"
@@ -72,6 +73,7 @@ function App() {
 
 
           {/* Rutas de perfil */}
+          <Route path="/find-account" element={<FindAccountScreen />} />
           <Route path="/profile" element={<ProfileScreen />} />
           <Route path="/direcciones" element={<DireccionesScreen />} />
           <Route path="/direcciones/nueva" element={<NuevaDireccionScreen />} />
@@ -86,7 +88,7 @@ function App() {
           <Route path="/puntos-lealtad" element={<PuntosLealtadScreen />} />
           <Route path="/trivia" element={<TriviaScreen />} />
           <Route path="/trivia/:pedidoId" element={<TriviaScreen />} />
-
+          <Route path="/verify-email" element={<VerifyEmailScreen />} />
           <Route
             path="/panel-gerente"
             element={

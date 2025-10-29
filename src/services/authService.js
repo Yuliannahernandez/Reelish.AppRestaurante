@@ -108,6 +108,14 @@ async resendVerification(correo) {
     return response.data;
   },
 
+   // ==================== BUSCAR CUENTA ====================
+  async findAccount(searchType, searchData) {
+    const response = await api.post('/auth/find-account', { 
+      searchType, 
+      searchData 
+    });
+    return response.data;
+  },
   // ==================== PERFIL Y VERIFICACIÓN ====================
   async verifyToken() {
     const response = await api.get('/auth/verify');

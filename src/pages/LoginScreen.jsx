@@ -296,6 +296,15 @@ const LoginScreen = () => {
                                     </Link>
                                 </div>
 
+                                 <div className="mt-6 text-center">
+                                    <Link
+                                        to="/find-account"
+                                        className="text-burgundy-700 hover:text-burgundy-900 text-sm font-medium"
+                                    >
+                                        ¿Olvidaste tu cuenta?
+                                    </Link>
+                                </div>
+
                                 <div className="relative my-6">
                                     <div className="absolute inset-0 flex items-center">
                                         <div className="w-full border-t border-gray-300"></div>

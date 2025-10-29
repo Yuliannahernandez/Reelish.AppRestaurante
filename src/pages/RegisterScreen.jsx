@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, User, AlertCircle, CheckCircle, Send } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/authService';
+import PasswordValidator, { validatePassword } from '../components/PasswordValidator';
 import logoImage from '../assets/Logosinletrasabajo-removebg-preview.png';
 
 const RegisterScreen = () => {
@@ -41,8 +42,10 @@ const RegisterScreen = () => {
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
+    // Validar seguridad de contraseña
+    const passwordValidation = validatePassword(formData.password);
+    if (!passwordValidation.isValid) {
+      setError('La contraseña no cumple con los requisitos de seguridad');
       return;
     }
 
@@ -57,7 +60,7 @@ const RegisterScreen = () => {
         setRegistrationComplete(true);
         setRegisteredEmail(registerData.correo);
       } else {
-        
+        // Si no requiere verificación (caso raro), ir al home
         navigate('/home');
       }
     } catch (err) {
@@ -200,7 +203,7 @@ const RegisterScreen = () => {
           Registrarse
         </h2>
         <p className="text-gray-600 mb-6">
-          Ingresa un correo y contraseña para poder registrarse.
+          Crea tu cuenta para comenzar a disfrutar de Reelish.
         </p>
 
         {error && (
@@ -285,6 +288,10 @@ const RegisterScreen = () => {
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy-500 focus:border-transparent outline-none transition"
               />
             </div>
+            <PasswordValidator 
+              password={formData.password} 
+              showValidation={formData.password.length > 0}
+            />
           </div>
 
           {/* Confirm Password */}
