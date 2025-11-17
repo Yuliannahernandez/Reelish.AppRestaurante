@@ -6,14 +6,14 @@ import { profileService } from '../services/profileService';
 const NuevaDireccionScreen = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    alias: '',
-    direccionCompleta: '',
-    ciudad: 'Cartago',
-    provincia: 'Cartago',
-    codigoPostal: '',
-    referencia: '',
-    esPrincipal: false,
-  });
+  alias: '',
+  provincia: 'Cartago',
+  ciudad: '',
+  direccionCompleta: '',
+  codigoPostal: '',
+  referencia: '',
+  esPrincipal: false,
+});
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -35,7 +35,8 @@ const NuevaDireccionScreen = () => {
       await profileService.createDireccion(formData);
       navigate('/direcciones');
     } catch (err) {
-      setError(err.response?.data?.message || 'Error al guardar la dirección');
+      console.error('Error completo:', err.response?.data);
+      setError(err.response?.data?.detail || 'Error al guardar la dirección');
     } finally {
       setLoading(false);
     }
@@ -64,15 +65,32 @@ const NuevaDireccionScreen = () => {
           </div>
         )}
 
-        {/* Dirección */}
+        {/* Provincia (readonly por ahora) */}
         <div className="mb-4">
           <div className="relative">
             <MapPin className="absolute left-3 top-3 text-burgundy-600 w-5 h-5" />
             <input
               type="text"
-              name="direccionCompleta"
-              placeholder="Dirección"
-              value={formData.direccionCompleta}
+              name="provincia"
+              placeholder="Provincia"
+              value={formData.provincia}
+              onChange={handleChange}
+              required
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy-500 focus:border-transparent outline-none bg-gray-50"
+              readOnly
+            />
+          </div>
+        </div>
+
+        {/* Cantón */}
+        <div className="mb-4">
+          <div className="relative">
+            <MapPin className="absolute left-3 top-3 text-burgundy-600 w-5 h-5" />
+            <input
+              type="text"
+              name="canton"
+              placeholder="Cantón (ej: Cartago, Desamparados)"
+              value={formData.canton}
               onChange={handleChange}
               required
               className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy-500 focus:border-transparent outline-none"
@@ -80,30 +98,48 @@ const NuevaDireccionScreen = () => {
           </div>
         </div>
 
-        {/* Piso/Oficina */}
+        {/* Distrito */}
+        <div className="mb-4">
+          <div className="relative">
+            <MapPin className="absolute left-3 top-3 text-burgundy-600 w-5 h-5" />
+            <input
+              type="text"
+              name="distrito"
+              placeholder="Distrito (ej: Oriental, San Rafael)"
+              value={formData.distrito}
+              onChange={handleChange}
+              required
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy-500 focus:border-transparent outline-none"
+            />
+          </div>
+        </div>
+
+        {/* Alias/Tipo */}
         <div className="mb-4">
           <div className="relative">
             <Building2 className="absolute left-3 top-3 text-burgundy-600 w-5 h-5" />
             <input
               type="text"
               name="alias"
-              placeholder="Piso/Oficina"
+              placeholder="Tipo (ej: Casa, Apartamento, Oficina)"
               value={formData.alias}
               onChange={handleChange}
+              required
               className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy-500 focus:border-transparent outline-none"
             />
           </div>
         </div>
 
-        {/* Especificaciones o Notas */}
+        {/* Dirección Exacta */}
         <div className="mb-6">
           <div className="relative">
             <FileText className="absolute left-3 top-3 text-burgundy-600 w-5 h-5" />
             <textarea
-              name="referencia"
-              placeholder="Especificaciones o Notas"
-              value={formData.referencia}
+              name="direccionExacta"
+              placeholder="Dirección exacta y especificaciones"
+              value={formData.direccionExacta}
               onChange={handleChange}
+              required
               rows={4}
               className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy-500 focus:border-transparent outline-none resize-none"
             />

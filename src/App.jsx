@@ -33,6 +33,7 @@ import TwoFactorSettings from './pages/TwoFactorSettings';
 import VerifyEmailScreen from './pages/VerifyEmailScreen';
 import ResetPasswordScreen from './pages/ResetPasswordScreen';
 import FindAccountScreen from './pages/FindAccountScreen';
+import TipoCambio from './pages/TipoCambio';
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -63,6 +64,7 @@ function App() {
           <Route path="/productos/:id" element={<ProductoDetalleScreen />} />
           <Route path="/reset-password" element={<ResetPasswordScreen />} />
           <Route path="/verify-email" element={<VerifyEmailScreen />} />
+          <Route path="/tipo-cambio" element={<TipoCambio />} />
           <Route
             path="/gerente/productos/nuevo"
             element={

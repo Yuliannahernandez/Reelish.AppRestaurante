@@ -118,7 +118,7 @@ const ProductosCategoriaScreen = () => {
                 {/* Imagen */}
                 <div className="relative h-48 bg-gray-200">
                   <img
-                    src={producto.imagen || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80'}
+                    src={producto.imagen_principal || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80'}
                     alt={producto.nombre}
                     className="w-full h-full object-cover"
                   />

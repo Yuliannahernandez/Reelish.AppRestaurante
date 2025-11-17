@@ -93,7 +93,13 @@ const DireccionesScreen = () => {
                     </p>
                     <p className="text-sm text-gray-500 mt-1">
                       {dir.ciudad}, {dir.provincia}
+                      {dir.codigoPostal && ` • ${dir.codigoPostal}`}
                     </p>
+                    {dir.referencia && (
+                      <p className="text-xs text-gray-400 mt-1">
+                        {dir.referencia}
+                      </p>
+                    )}
                     {dir.esPrincipal && (
                       <span className="inline-block mt-2 px-2 py-1 bg-gold text-burgundy-900 text-xs rounded">
                         Principal

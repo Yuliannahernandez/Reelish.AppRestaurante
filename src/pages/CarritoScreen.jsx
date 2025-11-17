@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,useLocation } from 'react-router-dom';
 import { carritoService } from '../services/carritoService';
 import { cuponesService } from '../services/cuponesService';
-import { ArrowLeft, Trash2, Plus, Minus, MapPin, CreditCard, Tag, AlertCircle, Store, Banknote, Gift, X } from 'lucide-react';
+import { tipoCambioService } from '../services/tipoCambioService';
+import { ArrowLeft, Trash2, Plus, Minus, MapPin, CreditCard, Tag, AlertCircle, Store, Banknote, Gift, X,DollarSign } from 'lucide-react';
 
 const CarritoScreen = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [carrito, setCarrito] = useState(null);
+  const [sucursal, setSucursal] = useState(null);
   const [loading, setLoading] = useState(true);
   const [procesando, setProcesando] = useState(false);
   const [metodoPago, setMetodoPago] = useState(null);
@@ -15,9 +18,11 @@ const CarritoScreen = () => {
   const [codigoCupon, setCodigoCupon] = useState('');
   const [aplicandoCupon, setAplicandoCupon] = useState(false);
   const [cuponAplicado, setCuponAplicado] = useState(null);
-
+  const [tipoCambio, setTipoCambio] = useState(null);
+  const [mostrarEnDolares, setMostrarEnDolares] = useState(false);
   useEffect(() => {
     loadCarrito();
+    loadTipoCambio(); 
 
     const metodoGuardado = localStorage.getItem('metodoPagoSeleccionado');
     if (metodoGuardado) {
@@ -27,8 +32,31 @@ const CarritoScreen = () => {
 
   const loadCarrito = async () => {
     try {
+      console.log('Cargando carrito...');
       const data = await carritoService.getCarrito();
+      console.log('Datos del carrito:', data);
+      
       setCarrito(data);
+      
+      // Cargar información de la sucursal si existe
+      if (data?.sucursal) {
+        console.log('Sucursal encontrada en carrito:', data.sucursal);
+        setSucursal(data.sucursal);
+      } else if (data?.sucursal_id) {
+        console.log('Cargando sucursal por ID:', data.sucursal_id);
+        try {
+          const sucursalData = await sucursalesService.getSucursal(data.sucursal_id);
+          console.log('Sucursal cargada:', sucursalData);
+          setSucursal(sucursalData);
+        } catch (error) {
+          console.error('Error cargando sucursal:', error);
+        }
+      } else {
+        console.log('No hay sucursal seleccionada');
+        setSucursal(null);
+      }
+      
+      // Cargar cupón si existe
       if (data.cuponAplicado) {
         setCuponAplicado(data.cuponAplicado);
       }
@@ -40,16 +68,36 @@ const CarritoScreen = () => {
     }
   };
 
-  const handleIncrementar = async (detalleId, cantidadActual) => {
-    setProcesando(true);
+   // ← FUNCIÓN PARA CARGAR TIPO DE CAMBIO
+  const loadTipoCambio = async () => {
     try {
-      const data = await carritoService.actualizarCantidad(detalleId, cantidadActual + 1);
-      setCarrito(data);
+      const data = await tipoCambioService.getTipoCambioActual();
+      setTipoCambio(data);
     } catch (error) {
-      console.error('Error:', error);
-    } finally {
-      setProcesando(false);
+      console.error('Error cargando tipo de cambio:', error);
+      // Intentar con caché
+      try {
+        const cacheData = await tipoCambioService.getTipoCambioCache();
+        setTipoCambio(cacheData);
+      } catch (e) {
+        console.error('Error cargando caché:', e);
+      }
     }
+  };
+
+    // ← FUNCIÓN PARA CONVERTIR A DÓLARES
+  const convertirADolares = (montoCRC) => {
+    if (!tipoCambio) return 0;
+    return montoCRC / tipoCambio.venta;
+  };
+
+  // ← FUNCIÓN PARA FORMATEAR PRECIO
+  const formatearPrecio = (monto) => {
+    if (!mostrarEnDolares) {
+      return `₡${Number(monto || 0).toLocaleString()}`;
+    }
+    const enDolares = convertirADolares(monto);
+    return `$${enDolares.toFixed(2)}`;
   };
 
   const handleDecrementar = async (detalleId, cantidadActual) => {
@@ -144,23 +192,54 @@ const CarritoScreen = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white pb-32">
-      {/* Header */}
-      <div className="bg-burgundy-600 text-white py-4 px-6 sticky top-0 z-10">
+  <div className="min-h-screen bg-white pb-32">
+    {/* Header */}
+    <div className="bg-burgundy-600 text-white py-4 px-6 sticky top-0 z-10">
+      <div className="flex items-center justify-between"> {/* ← CAMBIAR de gap-3 a justify-between */}
         <div className="flex items-center gap-3">
           <button onClick={() => navigate('/home')} className="p-2">
             <ArrowLeft className="w-6 h-6" />
           </button>
           <h1 className="text-xl font-italic">MI PEDIDO</h1>
         </div>
+        
+        {/* ← BOTÓN PARA CAMBIAR MONEDA - AHORA DENTRO DEL HEADER */}
+        {tipoCambio && (
+          <button
+            onClick={() => setMostrarEnDolares(!mostrarEnDolares)}
+            className="flex items-center gap-2 bg-white/20 hover:bg-white/30 px-3 py-2 rounded-full transition"
+          >
+            <DollarSign className="w-4 h-4" />
+            <span className="text-sm font-medium">
+              {mostrarEnDolares ? 'USD' : 'CRC'}
+            </span>
+          </button>
+        )}
       </div>
+    </div>
 
-      {error && (
-        <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
-          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-          <p className="text-red-700 text-sm">{error}</p>
+    {/* ← BANNER DE TIPO DE CAMBIO */}
+    {tipoCambio && (
+      <div className="bg-gradient-to-r from-green-50 to-green-100 border-b border-green-200 px-6 py-3">
+        <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center gap-2">
+            <DollarSign className="w-4 h-4 text-green-600" />
+            <span className="text-gray-700">Tipo de cambio:</span>
+            <span className="font-bold text-green-900">₡{tipoCambio.venta.toFixed(2)}</span>
+          </div>
+          <span className="text-xs text-gray-600">
+            {tipoCambio.fuente === 'BCCR' ? 'BCCR' : 'Caché'} • {tipoCambio.fecha}
+          </span>
         </div>
-      )}
+      </div>
+    )}
+
+    {error && (
+      <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+        <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+        <p className="text-red-700 text-sm">{error}</p>
+      </div>
+    )}
 
       <div className="px-6 py-6">
         {/* Sucursal seleccionada */}
@@ -373,7 +452,7 @@ const CarritoScreen = () => {
 
                   <div className="text-right flex-shrink-0">
                     <p className="text-burgundy-900 font-bold text-sm">
-                      ₡{Number(producto.subtotal || 0).toLocaleString()}
+                      {formatearPrecio(producto.subtotal)} {/* ← Usar función */}
                     </p>
                   </div>
                 </div>
@@ -397,24 +476,30 @@ const CarritoScreen = () => {
           <div className="space-y-2 mb-6 bg-gray-50 p-4 rounded-lg">
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Subtotal ({carrito.productos.length} productos)</span>
-              <span className="font-semibold">₡{Number(carrito.subtotal || 0).toLocaleString()}</span>
+              <span className="font-semibold">{formatearPrecio(carrito.subtotal)}</span>
             </div>
             {carrito.descuento > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Descuento (Cupón)</span>
-                <span className="font-semibold text-green-600">-₡{Number(carrito.descuento || 0).toLocaleString()}</span>
+                <span className="font-semibold text-green-600">-{formatearPrecio(carrito.descuento)}</span>
               </div>
             )}
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">IVA (13%)</span>
-              <span className="font-semibold">₡{(Number(carrito.subtotal || 0) * 0.13).toFixed(0)}</span>
+              <span className="font-semibold">{formatearPrecio(Number(carrito.subtotal || 0) * 0.13)}</span>
             </div>
             <div className="pt-2 border-t-2 border-burgundy-200 flex justify-between mt-3">
               <span className="font-bold text-burgundy-900 text-lg">Total</span>
               <span className="font-bold text-burgundy-900 text-xl">
-                ₡{Number(carrito.total || 0).toLocaleString()}
+                 {formatearPrecio(carrito.total)}
               </span>
             </div>
+            {/* ← MOSTRAR CONVERSIÓN SI ESTÁ EN DÓLARES */}
+            {mostrarEnDolares && tipoCambio && (
+              <div className="pt-2 text-xs text-gray-500 text-right">
+                Aprox. ₡{Number(carrito.total || 0).toLocaleString()} CRC
+              </div>
+            )}
           </div>
         )}
       </div>

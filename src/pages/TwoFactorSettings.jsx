@@ -18,7 +18,7 @@ const TwoFactorSettings = () => {
       setError('');
       setSuccess('');
       const response = await authService.generate2FA();
-      console.log('Respuesta 2FA:', response); // Para debug
+      console.log('Respuesta 2FA:', response); 
       setQrData(response);
       setStep('qr');
     } catch (err) {

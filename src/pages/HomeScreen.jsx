@@ -45,13 +45,19 @@ const HomeScreen = () => {
   };
 
   const loadPuntosLealtad = async () => {
-    try {
-      const perfil = await clienteService.getPerfil();
-      setPuntosLealtad(perfil.puntosLealtad || 0);
-    } catch (error) {
-      console.error('Error loading puntos:', error);
-    }
-  };
+  try {
+    const perfil = await clienteService.getPerfil();
+    console.log('📊 Perfil recibido:', perfil); // ← Ver qué devuelve
+    
+    // Probar ambas opciones
+    const puntos = perfil.puntosLealtad || perfil.puntos_lealtad || 0;
+    console.log('🎯 Puntos:', puntos);
+    
+    setPuntosLealtad(puntos);
+  } catch (error) {
+    console.error('Error loading puntos:', error);
+  }
+};
 
   const handleCategoriaClick = (cat) => {
     setCategoriaSeleccionada(cat.id);
@@ -91,26 +97,7 @@ const HomeScreen = () => {
         </div>
       </div>
 
-      <div className="flex justify-center">
-        <div
-          onClick={() => navigate('/puntos-lealtad')}
-          className="border-2 border-burgundy-700 rounded-xl p-2 cursor-pointer hover:shadow-lg transition-all bg-white w-80"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="bg-gold p-2 rounded-full">
-                <Award className="w-4 h-4 text-burgundy-900" />
-              </div>
-              <div>
-                <p className="text-gold text-[10px] font-semibold">TUS PUNTOS</p>
-                <p className="text-burgundy-900 text-lg font-bold">{puntosLealtad}</p>
-                <p className="text-gray-500 text-[10px]">Puntos disponibles</p>
-              </div>
-            </div>
-            <div className="text-burgundy-700 text-xl">›</div>
-          </div>
-        </div>
-      </div>
+      
 
 
       {/* Botón de Menú Circular */}
@@ -216,7 +203,7 @@ const HomeScreen = () => {
                   onClick={() => navigate(`/producto/${producto.id}`)}
                 >
                   <img
-                    src={producto.imagenPrincipal || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80'}
+                    src={producto.imagen_principal || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&q=80'}
                     alt={producto.nombre}
                     className="w-full h-full object-cover"
                   />
@@ -261,7 +248,7 @@ const HomeScreen = () => {
                   <p className="text-gold font-bold">₡{producto.precio}</p>
                 </div>
                 <img
-                  src={producto.imagenPrincipal || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80'}
+                  src={producto.imagen_principal || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80'}
                   alt={producto.nombre}
                   className="w-20 h-20 object-cover rounded-lg"
                 />
@@ -285,7 +272,7 @@ const HomeScreen = () => {
               >
                 <div className="relative">
                   <img
-                    src={producto.imagenPrincipal || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&q=80'}
+                    src={producto.imagen_principal || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&q=80'}
                     alt={producto.nombre}
                     className="w-full h-32 object-cover"
                   />
@@ -322,7 +309,7 @@ const HomeScreen = () => {
                 </div>
                 <div className="flex items-center gap-4">
                   <img
-                    src={producto.imagenPrincipal || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80'}
+                    src={producto.imagen_principal || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80'}
                     alt={producto.nombre}
                     className="w-24 h-24 object-cover rounded-lg"
                   />
@@ -352,7 +339,7 @@ const HomeScreen = () => {
                 onClick={() => navigate(`/producto/${producto.id}`)}
               >
                 <img
-                  src={producto.imagenPrincipal || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&q=80'}
+                  src={producto.imagen_principal || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&q=80'}
                   alt={producto.nombre}
                   className="w-full h-32 object-cover"
                 />
@@ -447,28 +434,28 @@ const HomeScreen = () => {
             </span>
           </button>
 
-          {/* Botón Favoritos */}
+          {/* Botón Lealtad */}
           <button
             onClick={() => {
-              setActiveTab('favoritos');
-              navigate('/favoritos');
+              setActiveTab('/puntos-lealtad');
+              navigate('/puntos-lealtad');
             }}
-            className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${activeTab === 'favoritos' ? 'scale-110' : 'opacity-60 hover:opacity-100'
+            className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${activeTab === 'lealtad' ? 'scale-110' : 'opacity-60 hover:opacity-100'
               }`}
           >
             <div
-              className={`p-2.5 rounded-2xl transition-all ${activeTab === 'favoritos'
+              className={`p-2.5 rounded-2xl transition-all ${activeTab === 'lealtad'
                 ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg'
                 : 'bg-gray-100'
                 }`}
             >
-              <Heart className={`w-5 h-5 ${activeTab === 'favoritos' ? 'text-white' : 'text-gray-600'}`} />
+              <Award className={`w-5 h-5 ${activeTab === 'lealtad' ? 'text-white' : 'text-gray-600'}`} />
             </div>
             <span
-              className={`text-xs ${activeTab === 'favoritos' ? 'text-burgundy-800 font-medium' : 'text-gray-500'
+              className={`text-xs ${activeTab === 'lealtad' ? 'text-burgundy-800 font-medium' : 'text-gray-500'
                 }`}
             >
-              Favoritos
+              Lealtad
             </span>
           </button>
 

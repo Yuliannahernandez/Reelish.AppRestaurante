@@ -1,3 +1,5 @@
+// ProfileScreen.jsx
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
@@ -23,6 +25,7 @@ import {
 } from 'lucide-react';
 import { profileService } from '../services/profileService';
 import { useAuth } from '../context/AuthContext';
+import SelectorDireccion from '../components/SelectorDireccion';
 
 const ProfileScreen = () => {
   const { logout, user } = useAuth();
@@ -30,6 +33,7 @@ const ProfileScreen = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [direccion, setDireccion] = useState(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -105,6 +109,11 @@ const ProfileScreen = () => {
     setSuccess('');
   };
 
+  const handleDireccionChange = (nuevaDireccion) => {
+    setDireccion(nuevaDireccion);
+    console.log('Dirección seleccionada:', nuevaDireccion);
+  };
+
   const handleLogout = () => {
     if (window.confirm('¿Estás seguro de que deseas cerrar sesión?')) {
       logout();
@@ -113,37 +122,44 @@ const ProfileScreen = () => {
   };
 
   const handleSave = async () => {
-    setError('');
-    setSuccess('');
-    setSaving(true);
+  setError('');
+  setSuccess('');
+  setSaving(true);
 
-    try {
-      const updateData = {
-        nombre: formData.nombre,
-        apellido: formData.apellido,
-        telefono: formData.telefono,
-      };
+  try {
+    const updateData = {
+      nombre: formData.nombre,
+      apellido: formData.apellido,
+      telefono: formData.telefono,
+    };
 
-      if (formData.edad) {
-        updateData.edad = parseInt(formData.edad);
-      }
-
-      if (formData.fechaNacimiento) {
-        updateData.fechaNacimiento = formData.fechaNacimiento;
-      }
-
-      await profileService.updateProfile(updateData);
-      await loadProfile();
-      setIsEditing(false);
-      setSuccess('Perfil actualizado correctamente');
-
-      setTimeout(() => setSuccess(''), 3000);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Error al actualizar el perfil');
-    } finally {
-      setSaving(false);
+    if (formData.edad) {
+      updateData.edad = parseInt(formData.edad);
     }
-  };
+
+    if (formData.fechaNacimiento) {
+      updateData.fechaNacimiento = formData.fechaNacimiento;
+    }
+
+    // Agregar dirección si fue seleccionada
+    if (direccion && direccion.distritoId) {
+      updateData.localidadId = parseInt(direccion.distritoId); 
+    }
+
+    console.log(' Datos a enviar:', updateData); 
+
+    await profileService.updateProfile(updateData);
+    await loadProfile();
+    setIsEditing(false);
+    setSuccess('Perfil actualizado correctamente');
+
+    setTimeout(() => setSuccess(''), 3000);
+  } catch (err) {
+    setError(err.response?.data?.message || 'Error al actualizar el perfil');
+  } finally {
+    setSaving(false);
+  }
+};
 
   const handlePhotoChange = async (e) => {
     const file = e.target.files[0];
@@ -163,12 +179,6 @@ const ProfileScreen = () => {
     } finally {
       setSaving(false);
     }
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES');
   };
 
   if (loading) {
@@ -396,7 +406,18 @@ const ProfileScreen = () => {
           </div>
         </div>
 
-        {/* ==================== TARJETA DE SEGURIDAD 2FA (NUEVA) ==================== */}
+        {/* SELECTOR DE DIRECCIÓN */}
+        {isEditing && (
+          <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl p-6">
+            <label className="block text-xs font-medium text-burgundy-600 mb-4 ml-1">DIRECCIÓN</label>
+            <SelectorDireccion 
+              onDireccionChange={handleDireccionChange}
+              direccionInicial={profile?.localidadId}
+            />
+          </div>
+        )}
+
+        {/* Tarjeta de seguridad 2FA */}
         <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -459,88 +480,42 @@ const ProfileScreen = () => {
         )}
       </div>
 
-      {/* Navegación inferior minimalista con íconos flotantes */}
+      {/* Navegación inferior */}
       <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200/50 shadow-2xl">
         <div className="flex justify-around items-center max-w-md mx-auto px-6 py-4">
-
-          <button
-            onClick={() => handleNavigation('direcciones')}
-            className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${activeTab === 'direcciones' ? 'scale-110' : 'opacity-60 hover:opacity-100'
-              }`}
-          >
-            <div className={`p-2.5 rounded-2xl transition-all ${activeTab === 'direcciones'
-                ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg'
-                : 'bg-gray-100'
-              }`}>
+          <button onClick={() => handleNavigation('direcciones')} className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${activeTab === 'direcciones' ? 'scale-110' : 'opacity-60 hover:opacity-100'}`}>
+            <div className={`p-2.5 rounded-2xl transition-all ${activeTab === 'direcciones' ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg' : 'bg-gray-100'}`}>
               <MapPin className={`w-5 h-5 ${activeTab === 'direcciones' ? 'text-white' : 'text-gray-600'}`} />
             </div>
-            <span className={`text-xs ${activeTab === 'direcciones' ? 'text-burgundy-800 font-medium' : 'text-gray-500'}`}>
-              Direcciones
-            </span>
+            <span className={`text-xs ${activeTab === 'direcciones' ? 'text-burgundy-800 font-medium' : 'text-gray-500'}`}>Direcciones</span>
           </button>
 
-          <button
-            onClick={() => handleNavigation('metodospago')}
-            className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${activeTab === 'metodospago' ? 'scale-110' : 'opacity-60 hover:opacity-100'
-              }`}
-          >
-            <div className={`p-2.5 rounded-2xl transition-all ${activeTab === 'metodospago'
-                ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg'
-                : 'bg-gray-100'
-              }`}>
+          <button onClick={() => handleNavigation('metodospago')} className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${activeTab === 'metodospago' ? 'scale-110' : 'opacity-60 hover:opacity-100'}`}>
+            <div className={`p-2.5 rounded-2xl transition-all ${activeTab === 'metodospago' ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg' : 'bg-gray-100'}`}>
               <CreditCard className={`w-5 h-5 ${activeTab === 'metodospago' ? 'text-white' : 'text-gray-600'}`} />
             </div>
-            <span className={`text-xs ${activeTab === 'metodospago' ? 'text-burgundy-800 font-medium' : 'text-gray-500'}`}>
-              Pagos
-            </span>
+            <span className={`text-xs ${activeTab === 'metodospago' ? 'text-burgundy-800 font-medium' : 'text-gray-500'}`}>Pagos</span>
           </button>
 
-          <button
-            onClick={() => handleNavigation('idioma')}
-            className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${activeTab === 'idioma' ? 'scale-110' : 'opacity-60 hover:opacity-100'
-              }`}
-          >
-            <div className={`p-2.5 rounded-2xl transition-all ${activeTab === 'idioma'
-                ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg'
-                : 'bg-gray-100'
-              }`}>
+          <button onClick={() => handleNavigation('idioma')} className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${activeTab === 'idioma' ? 'scale-110' : 'opacity-60 hover:opacity-100'}`}>
+            <div className={`p-2.5 rounded-2xl transition-all ${activeTab === 'idioma' ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg' : 'bg-gray-100'}`}>
               <MessageSquare className={`w-5 h-5 ${activeTab === 'idioma' ? 'text-white' : 'text-gray-600'}`} />
             </div>
-            <span className={`text-xs ${activeTab === 'idioma' ? 'text-burgundy-800 font-medium' : 'text-gray-500'}`}>
-              Idioma
-            </span>
+            <span className={`text-xs ${activeTab === 'idioma' ? 'text-burgundy-800 font-medium' : 'text-gray-500'}`}>Idioma</span>
           </button>
 
-          <button
-            onClick={() => handleNavigation('condicionessalud')}
-            className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${activeTab === 'condicionessalud' ? 'scale-110' : 'opacity-60 hover:opacity-100'
-              }`}
-          >
-            <div className={`p-2.5 rounded-2xl transition-all ${activeTab === 'condicionessalud'
-                ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg'
-                : 'bg-gray-100'
-              }`}>
+          <button onClick={() => handleNavigation('condicionessalud')} className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${activeTab === 'condicionessalud' ? 'scale-110' : 'opacity-60 hover:opacity-100'}`}>
+            <div className={`p-2.5 rounded-2xl transition-all ${activeTab === 'condicionessalud' ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg' : 'bg-gray-100'}`}>
               <Heart className={`w-5 h-5 ${activeTab === 'condicionessalud' ? 'text-white' : 'text-gray-600'}`} />
             </div>
-            <span className={`text-xs ${activeTab === 'condicionessalud' ? 'text-burgundy-800 font-medium' : 'text-gray-500'}`}>
-              Salud
-            </span>
+            <span className={`text-xs ${activeTab === 'condicionessalud' ? 'text-burgundy-800 font-medium' : 'text-gray-500'}`}>Salud</span>
           </button>
 
-          <button
-            onClick={() => handleNavigation('perfil')}
-            className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${activeTab === 'perfil' ? 'scale-110' : 'opacity-60 hover:opacity-100'
-              }`}
-          >
-            <div className={`p-2.5 rounded-2xl transition-all ${activeTab === 'perfil'
-                ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg'
-                : 'bg-gray-100'
-              }`}>
+          <button onClick={() => handleNavigation('perfil')} className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${activeTab === 'perfil' ? 'scale-110' : 'opacity-60 hover:opacity-100'}`}>
+            <div className={`p-2.5 rounded-2xl transition-all ${activeTab === 'perfil' ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg' : 'bg-gray-100'}`}>
               <User className={`w-5 h-5 ${activeTab === 'perfil' ? 'text-white' : 'text-gray-600'}`} />
             </div>
-            <span className={`text-xs ${activeTab === 'perfil' ? 'text-burgundy-800 font-medium' : 'text-gray-500'}`}>
-              Perfil
-            </span>
+            <span className={`text-xs ${activeTab === 'perfil' ? 'text-burgundy-800 font-medium' : 'text-gray-500'}`}>Perfil</span>
           </button>
         </div>
       </div>

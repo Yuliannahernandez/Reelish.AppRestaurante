@@ -11,9 +11,8 @@ const getAuthHeader = () => {
 };
 
 export const triviaService = {
-  // ===============================
   //  INICIAR UNA NUEVA PARTIDA
-  // ===============================
+ 
   async iniciarPartida(pedidoId = null) {
     try {
       console.log(' Iniciando partida de trivia...');

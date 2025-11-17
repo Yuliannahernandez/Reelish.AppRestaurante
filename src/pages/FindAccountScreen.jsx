@@ -6,7 +6,7 @@ import logoImage from '../assets/Logosinletrasabajo-removebg-preview.png';
 
 const FindAccountScreen = () => {
   const navigate = useNavigate();
-  const [searchType, setSearchType] = useState('phone'); // 'phone', 'name'
+  const [searchType, setSearchType] = useState('phone'); 
   const [formData, setFormData] = useState({
     telefono: '',
     nombre: '',

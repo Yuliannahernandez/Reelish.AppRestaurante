@@ -40,16 +40,18 @@ const CondicionesSaludScreen = () => {
   };
 
   const handleGuardar = async () => {
-    setSaving(true);
-    try {
-      await profileService.updateCondiciones(misCondiciones);
-      navigate('/profile');
-    } catch (error) {
-      console.error('Error saving conditions:', error);
-    } finally {
-      setSaving(false);
-    }
-  };
+  setSaving(true);
+  try {
+    
+    await profileService.updateCondiciones(misCondiciones);
+    navigate('/profile');
+  } catch (error) {
+    console.error('Error saving conditions:', error);
+    alert('Error al guardar las condiciones');
+  } finally {
+    setSaving(false);
+  }
+};
 
   // Mapeo de condiciones a las que están en la BD
   const condicionesRiesgo = [

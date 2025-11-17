@@ -37,7 +37,22 @@ export const productosService = {
   },
 
   async getProductoDetalle(id) {
-    const response = await api.get(`/productos/${id}`);
-    return response.data;
-  },
+    const res = await api.get(`/productos/${id}/detalle`);
+    const p = res.data;
+
+    return {
+      id: p.id,
+      nombre: p.nombre,
+      descripcion: p.descripcion,
+      precio: p.precio,
+      imagenPrincipal: p.imagen_principal,
+      disponible: p.disponible,
+      categoriaNombre: p.categoria_nombre,
+      esNuevo: p.es_nuevo,
+      enTendencia: p.en_tendencia,
+      ingredientes: p.ingredientes,
+      informacionNutricional: p.informacion_nutricional,
+      tiempoPreparacion: p.tiempo_preparacion
+    };
+  }
 };

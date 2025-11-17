@@ -43,23 +43,32 @@ const NuevaTarjetaScreen = () => {
     e.target.value = value;
   };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-     
       const [mes, anio] = formData.fechaExpiracion.split('/');
-      const fechaExp = `20${anio}-${mes}-01`;
+      const fechaExp = `20${anio}-${mes.padStart(2, '0')}-01`;
 
+    
       await profileService.createMetodoPago({
-        ...formData,
-        fechaExpiracion: fechaExp,
+        tipo: formData.tipo,
+        alias: null,
+        ultimosDigitos: formData.ultimosDigitos,  
+        marca: formData.marca,
+        nombreTitular: formData.nombreTitular,    
+        fechaExpiracion: fechaExp,                
+        esPrincipal: formData.esPrincipal,        
+        tokenPago: null                            
       });
+
       navigate('/metodospago');
     } catch (err) {
-      setError(err.response?.data?.message || 'Error al guardar la tarjeta');
+      console.error('Error completo:', err.response?.data);
+      setError(err.response?.data?.detail || err.response?.data?.message || 'Error al guardar la tarjeta');
     } finally {
       setLoading(false);
     }
@@ -82,7 +91,7 @@ const NuevaTarjetaScreen = () => {
       {/* Modal Form */}
       <div className="px-6 py-6">
         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-          
+
 
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">

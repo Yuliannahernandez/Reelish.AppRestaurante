@@ -81,28 +81,33 @@ const EditarTarjetaScreen = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+  e.preventDefault();
+  setError('');
+  setLoading(true);
 
-    try {
-      const [mes, anio] = formData.fechaExpiracion.split('/');
-      const fechaExp = `20${anio}-${mes.padStart(2,'0')}-01`;
+  try {
+    const [mes, anio] = formData.fechaExpiracion.split('/');
+    const fechaExp = `20${anio}-${mes.padStart(2,'0')}-01`;
 
-      // PUT para actualizar tarjeta
-      await profileService.updateMetodoPago(id, {
-        ...formData,
-        fechaExpiracion: fechaExp,
-      });
+    await profileService.updateMetodoPago(id, {
+      tipo: formData.tipo,
+      alias: null,
+      ultimosDigitos: formData.ultimosDigitos,
+      marca: formData.marca,
+      nombreTitular: formData.nombreTitular,
+      fechaExpiracion: fechaExp,
+      esPrincipal: formData.esPrincipal,
+      tokenPago: null
+    });
 
-      navigate('/metodospago');
-    } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.message || 'Error al actualizar la tarjeta');
-    } finally {
-      setLoading(false);
-    }
-  };
+    navigate('/metodospago');
+  } catch (err) {
+    console.error('Error completo:', err.response?.data);
+    setError(err.response?.data?.detail || err.response?.data?.message || 'Error al actualizar la tarjeta');
+  } finally {
+    setLoading(false);
+  }
+};
 
   if (loadingInit) return <div className="min-h-screen flex items-center justify-center">Cargando...</div>;
 

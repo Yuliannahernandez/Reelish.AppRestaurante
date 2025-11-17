@@ -54,23 +54,45 @@ export const carritoService = {
     const response = await api.delete('/carrito/vaciar');
     return response.data;
   },
-   async seleccionarSucursal(sucursalId) {
-    const response = await api.put('/carrito/sucursal', { sucursalId });
-    return response.data;
+  
+  async seleccionarSucursal(sucursalId) {
+    try {
+      // Primero obtener el carrito actual
+      const carrito = await this.getCarrito();
+      
+      if (!carrito || !carrito.id) {
+        throw new Error('No hay un carrito activo');
+      }
+
+      console.log('Actualizando pedido', carrito.id, 'con sucursal', sucursalId);
+
+      // Actualizar la sucursal del pedido (carrito)
+      const response = await api.put(`/pedidos/${carrito.id}?sucursalId=${sucursalId}`);
+      
+      console.log('Sucursal actualizada:', response.data);
+      
+      return response.data;
+    } catch (error) {
+      console.error(' Error al seleccionar sucursal:', error.response?.data || error.message);
+      throw error;
+    }
   },
 
 
 
 async seleccionarMetodoPago(metodoPagoId) {
-  console.log(' Llamando a seleccionarMetodoPago con:', metodoPagoId);
+  console.log('💳 Llamando a seleccionarMetodoPago con:', metodoPagoId);
   console.log('Token actual:', localStorage.getItem('token')?.substring(0, 20) + '...');
   
   try {
-    const response = await api.put('/carrito/metodopago', { metodoPagoId });
-    console.log('Respuesta exitosa:', response.data);
+    // Enviar en snake_case
+    const response = await api.put('/carrito/metodopago', { 
+      metodo_pago_id: metodoPagoId  // ← Cambiar a snake_case
+    });
+    console.log('✅ Respuesta exitosa:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Error en seleccionarMetodoPago:', error);
+    console.error('❌ Error en seleccionarMetodoPago:', error);
     console.error('Status:', error.response?.status);
     console.error('Data:', error.response?.data);
     throw error;

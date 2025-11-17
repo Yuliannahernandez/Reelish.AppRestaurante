@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }) => {
         return response;
       }
 
-      // Si el registro fue exitoso y tiene token (caso raro), hacer login automático
+      // Si el registro fue exitoso y tiene token, hacer login automático
       if (response.token) {
         localStorage.setItem('token', response.token);
         setUser(response.user);
