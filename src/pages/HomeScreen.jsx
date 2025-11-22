@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { productosService } from '../services/productosService';
 import { categoriasService } from '../services/categoriasService';
 import { clienteService } from '../services/clienteService';
-import { Search, Home as HomeIcon, ShoppingCart, Heart, User, Plus, Menu, X, TrendingUp, Sparkles, Tag, ClipboardList, Award } from 'lucide-react';
+import { Search, Home as HomeIcon, ShoppingCart, Heart, User, Plus, Menu, X, TrendingUp, Sparkles, Tag, ClipboardList, Award, Film,Calendar } from 'lucide-react'; // ← Agregar Film
 
 const HomeScreen = () => {
   const navigate = useNavigate();
@@ -45,19 +45,18 @@ const HomeScreen = () => {
   };
 
   const loadPuntosLealtad = async () => {
-  try {
-    const perfil = await clienteService.getPerfil();
-    console.log('📊 Perfil recibido:', perfil); // ← Ver qué devuelve
-    
-    // Probar ambas opciones
-    const puntos = perfil.puntosLealtad || perfil.puntos_lealtad || 0;
-    console.log('🎯 Puntos:', puntos);
-    
-    setPuntosLealtad(puntos);
-  } catch (error) {
-    console.error('Error loading puntos:', error);
-  }
-};
+    try {
+      const perfil = await clienteService.getPerfil();
+      console.log(' Perfil recibido:', perfil);
+
+      const puntos = perfil.puntosLealtad || perfil.puntos_lealtad || 0;
+      console.log('Puntos:', puntos);
+
+      setPuntosLealtad(puntos);
+    } catch (error) {
+      console.error('Error loading puntos:', error);
+    }
+  };
 
   const handleCategoriaClick = (cat) => {
     setCategoriaSeleccionada(cat.id);
@@ -82,22 +81,63 @@ const HomeScreen = () => {
             <h1 className="text-2xl font-italic text-gold">¡Qué gusto</h1>
             <p className="text-xl font-italic text-gold">tenerte por acá!</p>
           </div>
-          <HomeIcon className="w-8 h-8 text-burgundy-900" />
+          
         </div>
 
-        {/* Barra de búsqueda */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-          <input
-            type="text"
-            placeholder="Buscar..."
-            onClick={() => navigate('/buscar')}
-            className="w-full pl-10 pr-4 py-3 bg-gray-100 rounded-full outline-none focus:ring-2 focus:ring-burgundy-500"
-          />
+        {/* Barra de búsqueda con botón de reservaciones */}
+        <div className="flex items-center gap-3">
+          {/* Barra de búsqueda */}
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              placeholder="Buscar..."
+              onClick={() => navigate('/buscar')}
+              readOnly
+              className="w-full pl-10 pr-4 py-3 bg-gray-100 rounded-full outline-none focus:ring-2 focus:ring-burgundy-500 cursor-pointer"
+            />
+          </div>
+
+          {/* Botón de Reservaciones */}
+          <button
+            onClick={() => navigate('/reservaciones')}
+            className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-burgundy-700 to-burgundy-900 rounded-full flex items-center justify-center hover:shadow-lg transition-all hover:scale-105 shadow-md"
+            title="Reservar mesa"
+            aria-label="Ir a reservaciones"
+          >
+            <Calendar className="w-6 h-6 text-white" />
+          </button>
         </div>
       </div>
 
-      
+
+
+      {/* Banner de Películas Minimalista */}
+      <div className="px-6 mb-6">
+        <div
+          onClick={() => navigate('/recomendaciones')}
+          className="relative bg-burgundy-700 rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.01] shadow-md"
+        >
+          <div className="relative p-5 flex items-center gap-3">
+            <Film className="w-6 h-6 text-white opacity-90" />
+            <div className="flex-1">
+              <h3 className="text-white font-semibold text-base">Películas para tu comida</h3>
+              <p className="text-white/80 text-sm">Qué ver mientras disfrutas tu pedido</p>
+            </div>
+            <svg
+              className="w-5 h-5 text-white/90"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+
+
 
 
       {/* Botón de Menú Circular */}
@@ -188,10 +228,7 @@ const HomeScreen = () => {
       {/* Contenido Principal */}
       <div className="px-6">
         {/* Botón destacado para ver todas las categorías */}
-        <div className="mb-6">
-
-
-        </div>
+        <div className="mb-6"></div>
 
         {/* Productos Destacados - Carrusel Deslizable */}
         <div className="mb-6 -mx-6">
@@ -227,6 +264,8 @@ const HomeScreen = () => {
           </div>
         </div>
 
+
+
         {/* Sección POPULAR */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
@@ -247,6 +286,16 @@ const HomeScreen = () => {
                   <h4 className="font-semibold text-burgundy-900">{producto.nombre}</h4>
                   <p className="text-gold font-bold">₡{producto.precio}</p>
                 </div>
+                {/* NUEVO: Indicador de favorito */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                   
+                  }}
+                  className="flex-shrink-0"
+                >
+                  <Heart className="w-5 h-5 text-gray-400 hover:text-red-500 transition-colors" />
+                </button>
                 <img
                   src={producto.imagen_principal || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&q=80'}
                   alt={producto.nombre}
@@ -327,6 +376,31 @@ const HomeScreen = () => {
             ))}
           </div>
         </div>
+        {/* Banner Favoritos Minimalista */}
+        <div className="px-6 mb-6">
+          <div
+            onClick={() => navigate('/favoritos')}
+            className="bg-burgundy-800 rounded-xl cursor-pointer transition transform hover:scale-[1.01] p-5 flex items-center gap-3 shadow-md"
+          >
+            <Heart className="w-6 h-6 text-white" />
+
+            <div className="flex-1">
+              <h3 className="text-white font-semibold text-base">Tus Favoritos</h3>
+              <p className="text-white/70 text-sm">Accede rápido a tus platillos guardados</p>
+            </div>
+
+            <svg
+              className="w-5 h-5 text-white/80"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </div>
+
+
 
         {/* Sección RECOMENDADOS */}
         <div className="mb-8">
@@ -355,30 +429,62 @@ const HomeScreen = () => {
         </div>
       </div>
 
+      // frontend/src/screens/HomeScreen.jsx - Solo actualizar el Bottom Navigation
+
       {/* Bottom Navigation  */}
       <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200/50 shadow-2xl z-20">
-        <div className="flex justify-around items-center max-w-md mx-auto px-6 py-4">
+        <div className="flex justify-around items-center max-w-md mx-auto px-4 py-3">
           {/* Botón Inicio */}
           <button
             onClick={() => {
               setActiveTab('home');
               navigate('/home');
             }}
-            className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${activeTab === 'home' ? 'scale-110' : 'opacity-60 hover:opacity-100'
+            className={`flex flex-col items-center gap-1 transition-all duration-300 ${activeTab === 'home' ? 'scale-110' : 'opacity-60 hover:opacity-100'
               }`}
           >
             <div
-              className={`p-2.5 rounded-2xl transition-all ${activeTab === 'home'
-                ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg'
-                : 'bg-gray-100'
+              className={`p-2 rounded-xl transition-all ${activeTab === 'home'
+                  ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg'
+                  : 'bg-gray-100'
                 }`}
             >
               <HomeIcon className={`w-5 h-5 ${activeTab === 'home' ? 'text-white' : 'text-gray-600'}`} />
             </div>
             <span
-              className={`text-xs ${activeTab === 'home' ? 'text-burgundy-800 font-medium' : 'text-gray-500'}`}
+              className={`text-[10px] ${activeTab === 'home' ? 'text-burgundy-800 font-medium' : 'text-gray-500'}`}
             >
               Inicio
+            </span>
+          </button>
+
+          {/* Botón Favoritos - NUEVO */}
+          <button
+            onClick={() => {
+              setActiveTab('favoritos');
+              navigate('/favoritos');
+            }}
+            className={`flex flex-col items-center gap-1 transition-all duration-300 ${activeTab === 'favoritos' ? 'scale-110' : 'opacity-60 hover:opacity-100'
+              }`}
+          >
+            <div
+              className={`p-2 rounded-xl transition-all ${activeTab === 'favoritos'
+                  ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg'
+                  : 'bg-gray-100'
+                }`}
+            >
+              <Heart
+                className={`w-5 h-5 ${activeTab === 'favoritos'
+                    ? 'text-white fill-white'
+                    : 'text-gray-600'
+                  }`}
+              />
+            </div>
+            <span
+              className={`text-[10px] ${activeTab === 'favoritos' ? 'text-burgundy-800 font-medium' : 'text-gray-500'
+                }`}
+            >
+              Favoritos
             </span>
           </button>
 
@@ -388,13 +494,13 @@ const HomeScreen = () => {
               setActiveTab('carrito');
               navigate('/carrito');
             }}
-            className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${activeTab === 'carrito' ? 'scale-110' : 'opacity-60 hover:opacity-100'
+            className={`flex flex-col items-center gap-1 transition-all duration-300 ${activeTab === 'carrito' ? 'scale-110' : 'opacity-60 hover:opacity-100'
               }`}
           >
             <div
-              className={`p-2.5 rounded-2xl transition-all ${activeTab === 'carrito'
-                ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg'
-                : 'bg-gray-100'
+              className={`p-2 rounded-xl transition-all ${activeTab === 'carrito'
+                  ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg'
+                  : 'bg-gray-100'
                 }`}
             >
               <ShoppingCart
@@ -402,7 +508,7 @@ const HomeScreen = () => {
               />
             </div>
             <span
-              className={`text-xs ${activeTab === 'carrito' ? 'text-burgundy-800 font-medium' : 'text-gray-500'}`}
+              className={`text-[10px] ${activeTab === 'carrito' ? 'text-burgundy-800 font-medium' : 'text-gray-500'}`}
             >
               Carrito
             </span>
@@ -414,13 +520,13 @@ const HomeScreen = () => {
               setActiveTab('pedidos');
               navigate('/mis-pedidos');
             }}
-            className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${activeTab === 'pedidos' ? 'scale-110' : 'opacity-60 hover:opacity-100'
+            className={`flex flex-col items-center gap-1 transition-all duration-300 ${activeTab === 'pedidos' ? 'scale-110' : 'opacity-60 hover:opacity-100'
               }`}
           >
             <div
-              className={`p-2.5 rounded-2xl transition-all ${activeTab === 'pedidos'
-                ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg'
-                : 'bg-gray-100'
+              className={`p-2 rounded-xl transition-all ${activeTab === 'pedidos'
+                  ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg'
+                  : 'bg-gray-100'
                 }`}
             >
               <ClipboardList
@@ -428,7 +534,7 @@ const HomeScreen = () => {
               />
             </div>
             <span
-              className={`text-xs ${activeTab === 'pedidos' ? 'text-burgundy-800 font-medium' : 'text-gray-500'}`}
+              className={`text-[10px] ${activeTab === 'pedidos' ? 'text-burgundy-800 font-medium' : 'text-gray-500'}`}
             >
               Pedidos
             </span>
@@ -437,22 +543,22 @@ const HomeScreen = () => {
           {/* Botón Lealtad */}
           <button
             onClick={() => {
-              setActiveTab('/puntos-lealtad');
+              setActiveTab('lealtad');
               navigate('/puntos-lealtad');
             }}
-            className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${activeTab === 'lealtad' ? 'scale-110' : 'opacity-60 hover:opacity-100'
+            className={`flex flex-col items-center gap-1 transition-all duration-300 ${activeTab === 'lealtad' ? 'scale-110' : 'opacity-60 hover:opacity-100'
               }`}
           >
             <div
-              className={`p-2.5 rounded-2xl transition-all ${activeTab === 'lealtad'
-                ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg'
-                : 'bg-gray-100'
+              className={`p-2 rounded-xl transition-all ${activeTab === 'lealtad'
+                  ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg'
+                  : 'bg-gray-100'
                 }`}
             >
               <Award className={`w-5 h-5 ${activeTab === 'lealtad' ? 'text-white' : 'text-gray-600'}`} />
             </div>
             <span
-              className={`text-xs ${activeTab === 'lealtad' ? 'text-burgundy-800 font-medium' : 'text-gray-500'
+              className={`text-[10px] ${activeTab === 'lealtad' ? 'text-burgundy-800 font-medium' : 'text-gray-500'
                 }`}
             >
               Lealtad
@@ -465,19 +571,19 @@ const HomeScreen = () => {
               setActiveTab('perfil');
               navigate('/profile');
             }}
-            className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${activeTab === 'perfil' ? 'scale-110' : 'opacity-60 hover:opacity-100'
+            className={`flex flex-col items-center gap-1 transition-all duration-300 ${activeTab === 'perfil' ? 'scale-110' : 'opacity-60 hover:opacity-100'
               }`}
           >
             <div
-              className={`p-2.5 rounded-2xl transition-all ${activeTab === 'perfil'
-                ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg'
-                : 'bg-gray-100'
+              className={`p-2 rounded-xl transition-all ${activeTab === 'perfil'
+                  ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg'
+                  : 'bg-gray-100'
                 }`}
             >
               <User className={`w-5 h-5 ${activeTab === 'perfil' ? 'text-white' : 'text-gray-600'}`} />
             </div>
             <span
-              className={`text-xs ${activeTab === 'perfil' ? 'text-burgundy-800 font-medium' : 'text-gray-500'}`}
+              className={`text-[10px] ${activeTab === 'perfil' ? 'text-burgundy-800 font-medium' : 'text-gray-500'}`}
             >
               Perfil
             </span>

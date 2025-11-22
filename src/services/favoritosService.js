@@ -1,4 +1,3 @@
-// services/tipoCambioService.js
 
 import axios from 'axios';
 
@@ -11,7 +10,7 @@ const api = axios.create({
   },
 });
 
-
+// Interceptor para token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -23,21 +22,19 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-export const tipoCambioService = {
-  async getTipoCambioActual() {
-    const response = await api.get('/tipo-cambio/actual');
+export const favoritosService = {
+  async getMisFavoritos() {
+    const response = await api.get('/favoritos/mis-favoritos');
     return response.data;
   },
 
-  async getTipoCambioCache() {
-    const response = await api.get('/tipo-cambio/cache');
+  async toggleFavorito(productoId) {
+    const response = await api.post(`/favoritos/toggle/${productoId}`);
     return response.data;
   },
 
-  async convertirMoneda(monto, de = 'USD', a = 'CRC') {
-    const response = await api.get('/tipo-cambio/convertir', {
-      params: { monto, de, a }
-    });
+  async esFavorito(productoId) {
+    const response = await api.get(`/favoritos/es-favorito/${productoId}`);
     return response.data;
   }
 };

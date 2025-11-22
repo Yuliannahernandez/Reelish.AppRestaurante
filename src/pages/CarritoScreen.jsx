@@ -68,7 +68,7 @@ const CarritoScreen = () => {
     }
   };
 
-   // ← FUNCIÓN PARA CARGAR TIPO DE CAMBIO
+   // FUNCIÓN PARA CARGAR TIPO DE CAMBIO
   const loadTipoCambio = async () => {
     try {
       const data = await tipoCambioService.getTipoCambioActual();
@@ -85,13 +85,13 @@ const CarritoScreen = () => {
     }
   };
 
-    // ← FUNCIÓN PARA CONVERTIR A DÓLARES
+    // FUNCIÓN PARA CONVERTIR A DÓLARES
   const convertirADolares = (montoCRC) => {
     if (!tipoCambio) return 0;
     return montoCRC / tipoCambio.venta;
   };
 
-  // ← FUNCIÓN PARA FORMATEAR PRECIO
+  // FUNCIÓN PARA FORMATEAR PRECIO
   const formatearPrecio = (monto) => {
     if (!mostrarEnDolares) {
       return `₡${Number(monto || 0).toLocaleString()}`;
@@ -282,38 +282,7 @@ const CarritoScreen = () => {
           </div>
         </div>
 
-        {/* Método de Pago */}
-        <div className="mb-4 p-4 bg-white border border-gray-200 rounded-lg flex items-center justify-between">
-          <div className="flex items-center gap-3 flex-1">
-            {metodoPago?.tipo === 'efectivo' ? (
-              <div className="bg-green-100 p-2 rounded-full">
-                <Banknote className="w-5 h-5 text-green-600" />
-              </div>
-            ) : (
-              <div className="bg-burgundy-100 p-2 rounded-full">
-                <CreditCard className="w-5 h-5 text-burgundy-900" />
-              </div>
-            )}
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-gray-600">PAGO</p>
-              <p className="text-sm font-medium text-burgundy-900 truncate">
-                {metodoPago
-                  ? (metodoPago.tipo === 'efectivo'
-                    ? 'Efectivo'
-                    : `${metodoPago.marca?.toUpperCase()} ••${metodoPago.ultimosDigitos}`)
-                  : 'Seleccionar método de pago'
-                }
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={() => navigate('/seleccionar-metodo-pago')}
-            className="text-burgundy-900 text-xl flex-shrink-0"
-          >
-            ›
-          </button>
-        </div>
-
+       
         {/* Cupón de Descuento */}
         <div className="mb-6">
           {cuponAplicado ? (

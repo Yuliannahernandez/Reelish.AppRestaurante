@@ -1,4 +1,3 @@
-// services/tipoCambioService.js
 
 import axios from 'axios';
 
@@ -11,7 +10,6 @@ const api = axios.create({
   },
 });
 
-
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -23,21 +21,16 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-export const tipoCambioService = {
-  async getTipoCambioActual() {
-    const response = await api.get('/tipo-cambio/actual');
-    return response.data;
-  },
-
-  async getTipoCambioCache() {
-    const response = await api.get('/tipo-cambio/cache');
-    return response.data;
-  },
-
-  async convertirMoneda(monto, de = 'USD', a = 'CRC') {
-    const response = await api.get('/tipo-cambio/convertir', {
-      params: { monto, de, a }
+export const tseService = {
+  async validarCedula(numeroCedula) {
+    const response = await api.post('/tse/validar-cedula', {
+      numero_cedula: numeroCedula
     });
+    return response.data;
+  },
+
+  async getCedulasPrueba() {
+    const response = await api.get('/tse/cedulas-prueba');
     return response.data;
   }
 };

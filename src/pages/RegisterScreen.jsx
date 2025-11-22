@@ -1,9 +1,11 @@
+// frontend/src/pages/RegisterScreen.jsx
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Mail, Lock, User, AlertCircle, CheckCircle, Send } from 'lucide-react';
+import { Mail, Lock, User, AlertCircle, CheckCircle, Send, Phone, MapPin } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/authService';
 import PasswordValidator, { validatePassword } from '../components/PasswordValidator';
+import ValidadorCedula from '../components/ValidadorCedula';  // ← NUEVO IMPORT
 import logoImage from '../assets/Logosinletrasabajo-removebg-preview.png';
 
 const RegisterScreen = () => {
@@ -15,12 +17,16 @@ const RegisterScreen = () => {
     confirmPassword: '',
     nombre: '',
     apellido: '',
+    cedula: '',     
+    telefono: '',   
+    direccion: ''   
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [registrationComplete, setRegistrationComplete] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState('');
   const [resendSuccess, setResendSuccess] = useState(false);
+  const [cedulaValidada, setCedulaValidada] = useState(false);  
 
   const handleChange = (e) => {
     setFormData({
@@ -31,10 +37,33 @@ const RegisterScreen = () => {
     setResendSuccess(false);
   };
 
+  // ← NUEVA FUNCIÓN PARA MANEJAR VALIDACIÓN DE CÉDULA
+  const handleCedulaValidada = (datosCedula) => {
+    console.log('Cédula validada:', datosCedula);
+    
+    // Auto-completar formulario con datos del TSE
+    setFormData(prev => ({
+      ...prev,
+      cedula: datosCedula.numero_cedula,
+      nombre: datosCedula.nombre,
+      apellido: `${datosCedula.apellido1} ${datosCedula.apellido2}`.trim(),
+      direccion: `${datosCedula.provincia}, ${datosCedula.canton}, ${datosCedula.distrito}`
+    }));
+    
+    setCedulaValidada(true);
+    setError('');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setResendSuccess(false);
+
+    // ← VALIDAR CÉDULA
+    if (!cedulaValidada) {
+      setError('Por favor valida tu cédula con el TSE primero');
+      return;
+    }
 
     // Validar contraseñas
     if (formData.password !== formData.confirmPassword) {
@@ -213,118 +242,185 @@ const RegisterScreen = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Nombre */}
-          <div>
-            <label className="block text-sm font-medium text-burgundy-800 mb-1">
-              Nombre
-            </label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                name="nombre"
-                placeholder="Tu nombre"
-                value={formData.nombre}
-                onChange={handleChange}
-                required
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy-500 focus:border-transparent outline-none transition"
-              />
-            </div>
-          </div>
+        {/* ← NUEVO: VALIDADOR DE CÉDULA DEL TSE */}
+        <div className="mb-6">
+          <ValidadorCedula 
+            onCedulaValidada={handleCedulaValidada}
+            mostrarCedulasPrueba={true}
+          />
+        </div>
 
-          {/* Apellido */}
-          <div>
-            <label className="block text-sm font-medium text-burgundy-800 mb-1">
-              Apellido
-            </label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                name="apellido"
-                placeholder="Tu apellido"
-                value={formData.apellido}
-                onChange={handleChange}
-                required
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy-500 focus:border-transparent outline-none transition"
-              />
-            </div>
-          </div>
-
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium text-burgundy-800 mb-1">
-              Correo Electrónico
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="email"
-                name="correo"
-                placeholder="email@domain.com"
-                value={formData.correo}
-                onChange={handleChange}
-                required
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy-500 focus:border-transparent outline-none transition"
-              />
-            </div>
-          </div>
-
-          {/* Password */}
-          <div>
-            <label className="block text-sm font-medium text-burgundy-800 mb-1">
-              Contraseña
-            </label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="password"
-                name="password"
-                placeholder="••••••••••••"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy-500 focus:border-transparent outline-none transition"
-              />
-            </div>
-            <PasswordValidator 
-              password={formData.password} 
-              showValidation={formData.password.length > 0}
-            />
-          </div>
-
-          {/* Confirm Password */}
-          <div>
-            <label className="block text-sm font-medium text-burgundy-800 mb-1">
-              Confirmar Contraseña
-            </label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="password"
-                name="confirmPassword"
-                placeholder="••••••••••••"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy-500 focus:border-transparent outline-none transition"
-              />
-              {formData.confirmPassword && formData.password === formData.confirmPassword && (
+        {/* ← MOSTRAR FORMULARIO SOLO DESPUÉS DE VALIDAR CÉDULA */}
+        {cedulaValidada && (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Cédula (solo lectura) */}
+            <div>
+              <label className="block text-sm font-medium text-burgundy-800 mb-1">
+                Cédula 🇨🇷
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  name="cedula"
+                  value={formData.cedula}
+                  readOnly
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700"
+                />
                 <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500 w-5 h-5" />
-              )}
+              </div>
             </div>
-          </div>
 
-          {/* Botón de continuar */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-burgundy-800 hover:bg-burgundy-900 text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-6"
-          >
-            {loading ? 'Creando cuenta...' : 'Continuar'}
-          </button>
-        </form>
+            {/* Nombre */}
+            <div>
+              <label className="block text-sm font-medium text-burgundy-800 mb-1">
+                Nombre
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  name="nombre"
+                  placeholder="Tu nombre"
+                  value={formData.nombre}
+                  onChange={handleChange}
+                  required
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy-500 focus:border-transparent outline-none transition"
+                />
+              </div>
+            </div>
+
+            {/* Apellido */}
+            <div>
+              <label className="block text-sm font-medium text-burgundy-800 mb-1">
+                Apellidos
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  name="apellido"
+                  placeholder="Tus apellidos"
+                  value={formData.apellido}
+                  onChange={handleChange}
+                  required
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy-500 focus:border-transparent outline-none transition"
+                />
+              </div>
+            </div>
+
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-medium text-burgundy-800 mb-1">
+                Correo Electrónico
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="email"
+                  name="correo"
+                  placeholder="email@domain.com"
+                  value={formData.correo}
+                  onChange={handleChange}
+                  required
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy-500 focus:border-transparent outline-none transition"
+                />
+              </div>
+            </div>
+
+            {/* Teléfono - NUEVO */}
+            <div>
+              <label className="block text-sm font-medium text-burgundy-800 mb-1">
+                Teléfono
+              </label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="tel"
+                  name="telefono"
+                  placeholder="8888-8888"
+                  value={formData.telefono}
+                  onChange={handleChange}
+                  required
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy-500 focus:border-transparent outline-none transition"
+                />
+              </div>
+            </div>
+
+            {/* Dirección - NUEVO */}
+            <div>
+              <label className="block text-sm font-medium text-burgundy-800 mb-1">
+                Dirección
+              </label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
+                <textarea
+                  name="direccion"
+                  placeholder="Tu dirección completa"
+                  value={formData.direccion}
+                  onChange={handleChange}
+                  required
+                  rows={3}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy-500 focus:border-transparent outline-none transition resize-none"
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="block text-sm font-medium text-burgundy-800 mb-1">
+                Contraseña
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="••••••••••••"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy-500 focus:border-transparent outline-none transition"
+                />
+              </div>
+              <PasswordValidator 
+                password={formData.password} 
+                showValidation={formData.password.length > 0}
+              />
+            </div>
+
+            {/* Confirm Password */}
+            <div>
+              <label className="block text-sm font-medium text-burgundy-800 mb-1">
+                Confirmar Contraseña
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  placeholder="••••••••••••"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy-500 focus:border-transparent outline-none transition"
+                />
+                {formData.confirmPassword && formData.password === formData.confirmPassword && (
+                  <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-500 w-5 h-5" />
+                )}
+              </div>
+            </div>
+
+            {/* Botón de continuar */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-burgundy-800 hover:bg-burgundy-900 text-white font-semibold py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+            >
+              {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
+            </button>
+          </form>
+        )}
 
         {/* Link a login */}
         <div className="mt-6 text-center">

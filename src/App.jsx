@@ -34,7 +34,10 @@ import VerifyEmailScreen from './pages/VerifyEmailScreen';
 import ResetPasswordScreen from './pages/ResetPasswordScreen';
 import FindAccountScreen from './pages/FindAccountScreen';
 import TipoCambio from './pages/TipoCambio';
-
+import RecomendacionesScreen from './pages/RecomendacionesScreen';
+import FavoritosScreen from './pages/FavoritosScreen';
+import ReservacionesScreen from './pages/ReservacionesScreen';
+import MisReservacionesScreen from './pages/MisReservacionesScreen';
 function App() {
   const [showSplash, setShowSplash] = useState(true);
 
@@ -74,7 +77,9 @@ function App() {
           />
 
 
+
           {/* Rutas de perfil */}
+          
           <Route path="/find-account" element={<FindAccountScreen />} />
           <Route path="/profile" element={<ProfileScreen />} />
           <Route path="/direcciones" element={<DireccionesScreen />} />
@@ -96,6 +101,33 @@ function App() {
             element={
               <ProtectedRoute>
                 <PanelGerenteScreen />
+              </ProtectedRoute>
+            }
+          />
+           
+          <Route
+            path="/recomendaciones"
+            element={
+              <ProtectedRoute>
+                <RecomendacionesScreen />
+              </ProtectedRoute>
+            }
+          />
+          
+           
+          <Route
+            path="/reservaciones"
+            element={
+              <ProtectedRoute>
+                <ReservacionesScreen />
+              </ProtectedRoute>
+            }
+          />
+           <Route
+            path="/mis-reservaciones"
+            element={
+              <ProtectedRoute>
+                <MisReservacionesScreen />
               </ProtectedRoute>
             }
           />
@@ -125,12 +157,22 @@ function App() {
             }
           />
 
-           {/* ==================== RUTA 2FA (NUEVA) ==================== */}
+           
           <Route
             path="/seguridad/2fa"
             element={
               <ProtectedRoute>
                 <TwoFactorSettings />
+              </ProtectedRoute>
+            }
+          />
+
+          
+          <Route
+            path="/favoritos"
+            element={
+              <ProtectedRoute>
+                <FavoritosScreen />
               </ProtectedRoute>
             }
           />

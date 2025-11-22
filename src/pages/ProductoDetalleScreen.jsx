@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Heart, Star, ShoppingCart, ChevronDown, Minus, Plus } from 'lucide-react';
 import { productosService } from '../services/productosService';
 import { carritoService } from '../services/carritoService';
-
+import { favoritosService } from '../services/favoritosService'; 
 const ProductoDetalleScreen = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -14,9 +14,10 @@ const ProductoDetalleScreen = () => {
   const [cantidad, setCantidad] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
   const [agregando, setAgregando] = useState(false);
-
+  const [cargandoFavorito, setCargandoFavorito] = useState(false); 
   useEffect(() => {
     loadProducto();
+    verificarSiEsFavorito();
   }, [id]);
 
   const loadProducto = async () => {
@@ -29,10 +30,33 @@ const ProductoDetalleScreen = () => {
       setLoading(false);
     }
   };
+  const verificarSiEsFavorito = async () => {
+    try {
+      const data = await favoritosService.esFavorito(id);
+      setIsFavorite(data.esFavorito);
+    } catch (error) {
+      console.error('Error verificando favorito:', error);
+    }
+  };
 
-  const handleFavorite = () => {
-    setIsFavorite(!isFavorite);
-    
+  const handleFavorite = async () => {
+    setCargandoFavorito(true);
+    try {
+      const data = await favoritosService.toggleFavorito(id);
+      setIsFavorite(data.esFavorito);
+      
+      // Mostrar mensaje de éxito
+      if (data.esFavorito) {
+        alert('Agregado a favoritos');
+      } else {
+        alert('Eliminado de favoritos');
+      }
+    } catch (error) {
+      console.error('Error en favorito:', error);
+      alert('Error al actualizar favoritos');
+    } finally {
+      setCargandoFavorito(false);
+    }
   };
 
  const handleAddToCart = async () => {
@@ -119,19 +143,28 @@ const ProductoDetalleScreen = () => {
           >
             <ArrowLeft className="w-6 h-6 text-white" />
           </button>
+          
+          {/* ← ACTUALIZAR BOTÓN DE FAVORITO */}
           <button
             onClick={handleFavorite}
-            className="px-4 py-2 bg-black/30 backdrop-blur-sm rounded-full flex items-center gap-2 hover:bg-black/40 transition"
+            disabled={cargandoFavorito}
+            className="px-4 py-2 bg-black/30 backdrop-blur-sm rounded-full flex items-center gap-2 hover:bg-black/40 transition disabled:opacity-50"
           >
             <Heart 
-              className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-white'}`}
+              className={`w-5 h-5 transition-all ${
+                isFavorite 
+                  ? 'fill-red-500 text-red-500 scale-110' 
+                  : 'text-white'
+              }`}
             />
-            <span className="text-white text-sm font-medium">Favoritos</span>
+            <span className="text-white text-sm font-medium">
+              {cargandoFavorito ? 'Cargando...' : 'Favoritos'}
+            </span>
           </button>
         </div>
       </div>
 
-      {}
+      {/* Resto del componente sin cambios... */}
       <div className="flex justify-center -mt-32 mb-6 px-6 relative z-20">
         <div className="w-64 h-64 rounded-full bg-white shadow-2xl p-3 flex items-center justify-center">
           <div className="w-full h-full rounded-full overflow-hidden">

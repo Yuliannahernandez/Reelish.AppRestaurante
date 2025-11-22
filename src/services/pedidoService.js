@@ -1,3 +1,4 @@
+// frontend/src/services/pedidoService.js
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -34,9 +35,38 @@ export const pedidoService = {
     return response.data;
   },
 
-  // Crear pedido desde el carrito
-  async crearPedido() {
-    const response = await api.post('/pedidos/crear');
+  async crearPedido(paymentData = null) {
+    const payload = {};
+    
+    // Si viene con datos de pago, agregarlos
+    if (paymentData) {
+      if (paymentData.paypalOrderId) {
+        // PayPal
+        payload.metodoPago = 'paypal';
+        payload.paypalOrderId = paymentData.paypalOrderId;
+        payload.paypalPayerId = paymentData.paypalPayerId;
+        payload.paypalAmount = paymentData.paypalAmount;
+      } else if (paymentData.sinpeComprobante) {
+        // SINPE
+        payload.metodoPago = 'sinpe';
+        payload.sinpeComprobante = paymentData.sinpeComprobante;
+        payload.sinpeTelefono = paymentData.sinpeTelefono;
+      } else if (paymentData.transactionId) {
+        // Tarjeta de crédito/débito
+        payload.metodoPago = 'tarjeta';
+        payload.transactionId = paymentData.transactionId;
+        payload.tarjetaTipo = paymentData.tarjetaTipo;
+        payload.tarjetaUltimosDigitos = paymentData.tarjetaUltimosDigitos;
+      }
+    } else {
+      // Efectivo (default)
+      payload.metodoPago = 'efectivo';
+    }
+    
+    console.log(' Creando pedido con payload:', payload);
+    
+    
+    const response = await api.post('/pedidos/crear-desde-carrito', payload);
     return response.data;
   },
 
