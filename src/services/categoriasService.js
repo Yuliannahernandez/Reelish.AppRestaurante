@@ -1,13 +1,11 @@
 import axios from 'axios';
 
 
-const API_URL = 'http://localhost:3000/api';
+const PYTHON_API_URL = import.meta.env.VITE_PYTHON_API_URL;
 
-const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+export const pythonApi = axios.create({
+  baseURL: PYTHON_API_URL,
+  headers: { 'Content-Type': 'application/json' }
 });
 
 api.interceptors.request.use(
@@ -23,17 +21,17 @@ api.interceptors.request.use(
 
 export const categoriasService = {
   async getCategorias() {
-    const response = await api.get('/categorias');
+    const response = await pythonApi.get('/categorias');
     return response.data;
   },
 
   async getProductosPorCategoria(categoriaId) {
-    const response = await api.get(`/categorias/${categoriaId}/productos`);
+    const response = await pythonApi.get(`/categorias/${categoriaId}/productos`);
     return response.data;
   },
 
     async getProductoDetalle(id) {
-    const response = await api.get(`/productos/${id}`);
+    const response = await pythonApi.get(`/productos/${id}`);
     return response.data;
   },
 
