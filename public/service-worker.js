@@ -1,5 +1,4 @@
-const CACHE_NAME = "static-cache-v1";
-const API_CACHE = "api-cache-v1";
+const CACHE_NAME = "static-v1";
 
 const STATIC_ASSETS = [
   "/",
@@ -19,13 +18,7 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME && key !== API_CACHE) {
-            return caches.delete(key);
-          }
-        })
-      )
+      Promise.all(keys.map((k) => k !== CACHE_NAME && caches.delete(k)))
     )
   );
   self.clients.claim();
@@ -34,33 +27,15 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const req = event.request;
 
-  // ❌ No interceptar POST, PUT, DELETE, PATCH
-  if (req.method !== "GET") {
+  // NO tocar requests dinámicos (API)
+  if (!req.url.startsWith(self.location.origin)) {
     return;
   }
 
-  // ❌ No interceptar websocket de Vite
-  if (req.url.includes("ws://") || req.url.includes("vite")) {
-    return;
-  }
+  // NO interceptar POST/PUT/DELETE
+  if (req.method !== "GET") return;
 
-  const url = new URL(req.url);
-
-  if (url.pathname.startsWith("/api")) {
-    // Network First para API GET
-    event.respondWith(
-      fetch(req)
-        .then((res) => {
-          const clone = res.clone();
-          caches.open(API_CACHE).then((cache) => cache.put(req, clone));
-          return res;
-        })
-        .catch(() => caches.match(req))
-    );
-    return;
-  }
-
-  // Static assets – Cache First
+  // Cache First SOLO para assets
   event.respondWith(
     caches.match(req).then((cached) => {
       return (

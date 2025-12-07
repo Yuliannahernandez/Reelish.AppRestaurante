@@ -1,43 +1,41 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const PYTHON_API_URL = import.meta.env.VITE_PYTHON_API_URL;
 
-const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+export const pythonApi = axios.create({
+  baseURL: PYTHON_API_URL,
+  headers: { 'Content-Type': 'application/json' }
 });
 
 export const productosService = {
   async getProductos(categoriaId) {
     const params = categoriaId ? { categoria: categoriaId } : {};
-    const response = await api.get('/productos', { params });
+    const response = await pythonApi.get('/productos', { params });
     return response.data;
   },
 
   async getProductosNuevos() {
-    const response = await api.get('/productos/nuevos');
+    const response = await pythonApi.get('/productos/nuevos');
     return response.data;
   },
 
   async getProductosTendencia() {
-    const response = await api.get('/productos/tendencia');
+    const response = await pythonApi.get('/productos/tendencia');
     return response.data;
   },
 
   async getProductoDestacado() {
-    const response = await api.get('/productos/destacado');
+    const response = await pythonApi.get('/productos/destacado');
     return response.data;
   },
 
   async getCategorias() {
-    const response = await api.get('/productos/categorias');
+    const response = await pythonApi.get('/productos/categorias');
     return response.data;
   },
 
   async getProductoDetalle(id) {
-    const res = await api.get(`/productos/${id}/detalle`);
+    const res = await pythonApi.get(`/productos/${id}/detalle`);
     const p = res.data;
 
     return {
