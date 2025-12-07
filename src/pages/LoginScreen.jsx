@@ -91,29 +91,45 @@ const LoginScreen = () => {
     };
 
     const handleGoogleSuccess = async (credentialResponse) => {
-        try {
-            setLoading(true);
-            const result = await authService.googleLogin(credentialResponse.credential);
-            
-            localStorage.setItem('token', result.token);
-            
-            const user = result.user;
-            if (user.rol === 'gerente') {
-                navigate('/panel-gerente');
-            } else if (user.rol === 'cliente') {
-                navigate('/home');
-            } else if (user.rol === 'admin') {
-                navigate('/admin/dashboard');
-            } else {
-                navigate('/home');
-            }
-        } catch (err) {
-            console.error('Error con Google:', err);
-            setError(err.response?.data?.message || 'Error con Google');
-        } finally {
-            setLoading(false);
+    try {
+        setLoading(true);
+        
+        // DEBUG
+        console.log('🔐 Intentando login con Google...');
+        console.log('🔗 URL base:', import.meta.env.VITE_API_URL);
+        
+        // Llamar directamente con fetch en lugar de axios
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/auth/google/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ googleToken: credentialResponse.credential }),
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(result.message || 'Error al iniciar sesión');
         }
-    };
+        
+        localStorage.setItem('token', result.token);
+        
+        const user = result.user;
+        if (user.rol === 'gerente') {
+            navigate('/panel-gerente');
+        } else if (user.rol === 'cliente') {
+            navigate('/home');
+        } else if (user.rol === 'admin') {
+            navigate('/admin/dashboard');
+        } else {
+            navigate('/home');
+        }
+    } catch (err) {
+        console.error('Error con Google:', err);
+        setError(err.message || 'Error con Google');
+    } finally {
+        setLoading(false);
+    }
+};
 
     const handleGoogleError = () => {
         setError('Error al iniciar sesión con Google');

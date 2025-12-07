@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, Star, ShoppingCart, ChevronDown, Minus, Plus } from 'lucide-react';
+import { ArrowLeft, Heart, Star, ShoppingCart, ChevronDown, Minus, Plus, Home as HomeIcon, ClipboardList, Award, User } from 'lucide-react';
 import { productosService } from '../services/productosService';
 import { carritoService } from '../services/carritoService';
 import { favoritosService } from '../services/favoritosService'; 
+
 const ProductoDetalleScreen = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -14,7 +15,9 @@ const ProductoDetalleScreen = () => {
   const [cantidad, setCantidad] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
   const [agregando, setAgregando] = useState(false);
-  const [cargandoFavorito, setCargandoFavorito] = useState(false); 
+  const [cargandoFavorito, setCargandoFavorito] = useState(false);
+  const [activeTab, setActiveTab] = useState(''); // Sin tab activa por defecto en detalle
+
   useEffect(() => {
     loadProducto();
     verificarSiEsFavorito();
@@ -30,6 +33,7 @@ const ProductoDetalleScreen = () => {
       setLoading(false);
     }
   };
+
   const verificarSiEsFavorito = async () => {
     try {
       const data = await favoritosService.esFavorito(id);
@@ -45,7 +49,6 @@ const ProductoDetalleScreen = () => {
       const data = await favoritosService.toggleFavorito(id);
       setIsFavorite(data.esFavorito);
       
-      // Mostrar mensaje de éxito
       if (data.esFavorito) {
         alert('Agregado a favoritos');
       } else {
@@ -59,35 +62,34 @@ const ProductoDetalleScreen = () => {
     }
   };
 
- const handleAddToCart = async () => {
-  setAgregando(true);
-  try {
-    console.log('');
-    console.log('producto.id:', producto.id, 'tipo:', typeof producto.id);
-    console.log('cantidad:', cantidad, 'tipo:', typeof cantidad);
-    console.log('');
-    
-    await carritoService.agregarProducto(producto.id, cantidad);
-    alert(`${cantidad} ${producto.nombre} agregado(s) al carrito`);
-  } catch (error) {
-    console.error('Error completo:', error);
-    console.error('Error response:', error.response?.data);
-    
-    // Mostrar los mensajes del array
-    if (error.response?.data?.message && Array.isArray(error.response.data.message)) {
-      console.error('Mensajes de validación:');
-      error.response.data.message.forEach((msg, i) => {
-        console.error(`  ${i + 1}. ${msg}`);
-      });
+  const handleAddToCart = async () => {
+    setAgregando(true);
+    try {
+      console.log('');
+      console.log('producto.id:', producto.id, 'tipo:', typeof producto.id);
+      console.log('cantidad:', cantidad, 'tipo:', typeof cantidad);
+      console.log('');
       
-      alert(`Error:\n${error.response.data.message.join('\n')}`);
-    } else {
-      alert(`Error: ${error.response?.data?.message || error.message}`);
+      await carritoService.agregarProducto(producto.id, cantidad);
+      alert(`${cantidad} ${producto.nombre} agregado(s) al carrito`);
+    } catch (error) {
+      console.error('Error completo:', error);
+      console.error('Error response:', error.response?.data);
+      
+      if (error.response?.data?.message && Array.isArray(error.response.data.message)) {
+        console.error('Mensajes de validación:');
+        error.response.data.message.forEach((msg, i) => {
+          console.error(`  ${i + 1}. ${msg}`);
+        });
+        
+        alert(`Error:\n${error.response.data.message.join('\n')}`);
+      } else {
+        alert(`Error: ${error.response?.data?.message || error.message}`);
+      }
+    } finally {
+      setAgregando(false);
     }
-  } finally {
-    setAgregando(false);
-  }
-};
+  };
 
   const incrementar = () => {
     setCantidad(cantidad + 1);
@@ -126,7 +128,6 @@ const ProductoDetalleScreen = () => {
           borderBottomRightRadius: '50%'
         }}
       >
-        {/* Overlay oscuro */}
         <div 
           className="absolute inset-0 bg-black/40"
           style={{
@@ -135,7 +136,6 @@ const ProductoDetalleScreen = () => {
           }}
         ></div>
 
-        {/* Botones superiores */}
         <div className="absolute top-0 left-0 right-0 flex justify-between items-center p-4 z-10">
           <button
             onClick={() => navigate(-1)}
@@ -144,7 +144,6 @@ const ProductoDetalleScreen = () => {
             <ArrowLeft className="w-6 h-6 text-white" />
           </button>
           
-          {/* ← ACTUALIZAR BOTÓN DE FAVORITO */}
           <button
             onClick={handleFavorite}
             disabled={cargandoFavorito}
@@ -164,7 +163,6 @@ const ProductoDetalleScreen = () => {
         </div>
       </div>
 
-      {/* Resto del componente sin cambios... */}
       <div className="flex justify-center -mt-32 mb-6 px-6 relative z-20">
         <div className="w-64 h-64 rounded-full bg-white shadow-2xl p-3 flex items-center justify-center">
           <div className="w-full h-full rounded-full overflow-hidden">
@@ -179,13 +177,11 @@ const ProductoDetalleScreen = () => {
 
       {/* Contenido del producto */}
       <div className="px-6">
-        {/* Título y calificación */}
         <div className="text-center mb-4">
           <h1 className="text-xl font-bold text-burgundy-900 mb-3">
             {producto.nombre.toUpperCase()}
           </h1>
           
-          {/* Estrellas de calificación */}
           <div className="flex justify-center gap-1 mb-3">
             {[1, 2, 3, 4, 5].map((star) => (
               <Star 
@@ -195,13 +191,11 @@ const ProductoDetalleScreen = () => {
             ))}
           </div>
 
-          {/* Precio */}
           <div className="text-2xl font-bold text-yellow-600">
             ₡{producto.precio?.toLocaleString()}
           </div>
         </div>
 
-        {/* Sección SOBRE */}
         <div className="mb-6">
           <h2 className="text-lg font-bold text-burgundy-900 mb-2">SOBRE</h2>
           <p className="text-sm text-gray-700 leading-relaxed">
@@ -209,7 +203,6 @@ const ProductoDetalleScreen = () => {
           </p>
         </div>
 
-        {/* Sección INGREDIENTES */}
         <div className="mb-4">
           <button
             onClick={() => setShowIngredientes(!showIngredientes)}
@@ -246,7 +239,6 @@ const ProductoDetalleScreen = () => {
           )}
         </div>
 
-        {/* Sección INFORMACIÓN NUTRICIONAL */}
         <div className="mb-6">
           <button
             onClick={() => setShowNutricional(!showNutricional)}
@@ -324,10 +316,9 @@ const ProductoDetalleScreen = () => {
         </div>
       </div>
 
-      {/* Botón flotante para agregar al carrito */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-50">
+      {/* Botón flotante para agregar al carrito - Ahora con más espacio */}
+      <div className="fixed bottom-20 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-40">
         <div className="flex items-center gap-4">
-          {/* Selector de cantidad */}
           <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-2">
             <button 
               onClick={decrementar} 
@@ -345,7 +336,6 @@ const ProductoDetalleScreen = () => {
             </button>
           </div>
           
-          {/* Botón agregar al carrito */}
           <button 
             onClick={handleAddToCart}
             disabled={agregando}
@@ -353,6 +343,179 @@ const ProductoDetalleScreen = () => {
           >
             <ShoppingCart className="w-5 h-5" />
             {agregando ? 'Agregando...' : 'Agregar al carrito'}
+          </button>
+        </div>
+      </div>
+
+      {/* Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200/50 shadow-2xl z-50">
+        <div className="flex justify-around items-center max-w-md mx-auto px-4 py-3">
+          <button
+            onClick={() => {
+              setActiveTab('home');
+              navigate('/home');
+            }}
+            className={`flex flex-col items-center gap-1 transition-all duration-300 ${
+              activeTab === 'home' ? 'scale-110' : 'opacity-60 hover:opacity-100'
+            }`}
+          >
+            <div
+              className={`p-2 rounded-xl transition-all ${
+                activeTab === 'home'
+                  ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg'
+                  : 'bg-gray-100'
+              }`}
+            >
+              <HomeIcon className={`w-5 h-5 ${activeTab === 'home' ? 'text-white' : 'text-gray-600'}`} />
+            </div>
+            <span
+              className={`text-[10px] ${activeTab === 'home' ? 'text-burgundy-800 font-medium' : 'text-gray-500'}`}
+            >
+              Inicio
+            </span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTab('favoritos');
+              navigate('/favoritos');
+            }}
+            className={`flex flex-col items-center gap-1 transition-all duration-300 ${
+              activeTab === 'favoritos' ? 'scale-110' : 'opacity-60 hover:opacity-100'
+            }`}
+          >
+            <div
+              className={`p-2 rounded-xl transition-all ${
+                activeTab === 'favoritos'
+                  ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg'
+                  : 'bg-gray-100'
+              }`}
+            >
+              <Heart
+                className={`w-5 h-5 ${
+                  activeTab === 'favoritos' ? 'text-white fill-white' : 'text-gray-600'
+                }`}
+              />
+            </div>
+            <span
+              className={`text-[10px] ${
+                activeTab === 'favoritos' ? 'text-burgundy-800 font-medium' : 'text-gray-500'
+              }`}
+            >
+              Favoritos
+            </span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTab('carrito');
+              navigate('/carrito');
+            }}
+            className={`flex flex-col items-center gap-1 transition-all duration-300 ${
+              activeTab === 'carrito' ? 'scale-110' : 'opacity-60 hover:opacity-100'
+            }`}
+          >
+            <div
+              className={`p-2 rounded-xl transition-all ${
+                activeTab === 'carrito'
+                  ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg'
+                  : 'bg-gray-100'
+              }`}
+            >
+              <ShoppingCart
+                className={`w-5 h-5 ${activeTab === 'carrito' ? 'text-white' : 'text-gray-600'}`}
+              />
+            </div>
+            <span
+              className={`text-[10px] ${
+                activeTab === 'carrito' ? 'text-burgundy-800 font-medium' : 'text-gray-500'
+              }`}
+            >
+              Carrito
+            </span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTab('pedidos');
+              navigate('/mis-pedidos');
+            }}
+            className={`flex flex-col items-center gap-1 transition-all duration-300 ${
+              activeTab === 'pedidos' ? 'scale-110' : 'opacity-60 hover:opacity-100'
+            }`}
+          >
+            <div
+              className={`p-2 rounded-xl transition-all ${
+                activeTab === 'pedidos'
+                  ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg'
+                  : 'bg-gray-100'
+              }`}
+            >
+              <ClipboardList
+                className={`w-5 h-5 ${activeTab === 'pedidos' ? 'text-white' : 'text-gray-600'}`}
+              />
+            </div>
+            <span
+              className={`text-[10px] ${
+                activeTab === 'pedidos' ? 'text-burgundy-800 font-medium' : 'text-gray-500'
+              }`}
+            >
+              Pedidos
+            </span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTab('lealtad');
+              navigate('/puntos-lealtad');
+            }}
+            className={`flex flex-col items-center gap-1 transition-all duration-300 ${
+              activeTab === 'lealtad' ? 'scale-110' : 'opacity-60 hover:opacity-100'
+            }`}
+          >
+            <div
+              className={`p-2 rounded-xl transition-all ${
+                activeTab === 'lealtad'
+                  ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg'
+                  : 'bg-gray-100'
+              }`}
+            >
+              <Award className={`w-5 h-5 ${activeTab === 'lealtad' ? 'text-white' : 'text-gray-600'}`} />
+            </div>
+            <span
+              className={`text-[10px] ${
+                activeTab === 'lealtad' ? 'text-burgundy-800 font-medium' : 'text-gray-500'
+              }`}
+            >
+              Lealtad
+            </span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTab('perfil');
+              navigate('/profile');
+            }}
+            className={`flex flex-col items-center gap-1 transition-all duration-300 ${
+              activeTab === 'perfil' ? 'scale-110' : 'opacity-60 hover:opacity-100'
+            }`}
+          >
+            <div
+              className={`p-2 rounded-xl transition-all ${
+                activeTab === 'perfil'
+                  ? 'bg-gradient-to-br from-burgundy-700 to-burgundy-900 shadow-lg'
+                  : 'bg-gray-100'
+              }`}
+            >
+              <User className={`w-5 h-5 ${activeTab === 'perfil' ? 'text-white' : 'text-gray-600'}`} />
+            </div>
+            <span
+              className={`text-[10px] ${
+                activeTab === 'perfil' ? 'text-burgundy-800 font-medium' : 'text-gray-500'
+              }`}
+            >
+              Perfil
+            </span>
           </button>
         </div>
       </div>
