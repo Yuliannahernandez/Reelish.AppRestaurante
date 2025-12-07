@@ -8,7 +8,7 @@ export const pythonApi = axios.create({
   headers: { 'Content-Type': 'application/json' }
 });
 
-api.interceptors.request.use(
+pythonApi.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
