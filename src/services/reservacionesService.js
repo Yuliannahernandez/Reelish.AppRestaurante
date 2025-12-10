@@ -42,7 +42,7 @@ export const reservacionesService = {
   },
 
   async getSucursalesDisponibles() {
-    const response = await pythonApi.get('/reservaciones/sucursales/disponibles');
+    const response = await pythonApi.get('/sucursales/');
     return response.data;
   },
 
