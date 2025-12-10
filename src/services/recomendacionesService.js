@@ -8,14 +8,7 @@ export const pythonApi = axios.create({
   headers: { 'Content-Type': 'application/json' }
 });
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
 
 // Interceptor para token
 pythonApi.interceptors.request.use(
