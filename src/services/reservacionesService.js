@@ -1,6 +1,6 @@
 // frontend/src/services/reservacionesService.js
 import axios from 'axios';
-import { pythonApi } from './categoriasService';
+
 
 const PYTHON_API_URL = import.meta.env.VITE_PYTHON_API_URL;
 
