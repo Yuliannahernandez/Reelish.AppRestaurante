@@ -2,6 +2,13 @@ import axios from 'axios';
 
 
 const PYTHON_API_URL = import.meta.env.VITE_PYTHON_API_URL;
+const API_URL = import.meta.env.VITE_API_URL;
+
+
+export const api = axios.create({
+  baseURL: API_URL,
+  headers: { 'Content-Type': 'application/json' }
+});
 
 export const pythonApi = axios.create({
   baseURL: PYTHON_API_URL,
@@ -26,7 +33,7 @@ export const categoriasService = {
   },
 
   async getProductosPorCategoria(categoriaId) {
-    const response = await pythonApi.get(`/categorias/${categoriaId}/productos`);
+    const response = await api.get(`/categorias/${categoriaId}/productos`);
     return response.data;
   },
 
