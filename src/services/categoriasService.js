@@ -4,10 +4,6 @@ import axios from 'axios';
 const PYTHON_API_URL = import.meta.env.VITE_PYTHON_API_URL;
 
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_PYTHON_API_URL,
-  headers: { 'Content-Type': 'application/json' }
-});
 
 export const pythonApi = axios.create({
   baseURL: PYTHON_API_URL,
